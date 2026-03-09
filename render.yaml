@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: storyscore-api
+    runtime: node
+    buildCommand: cd server && npm install
+    startCommand: cd server && node src/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: AI_PROVIDER
+        value: claude
+      - key: CLAUDE_MODEL
+        value: claude-sonnet-4-20250514
+      - key: CLAUDE_CHAT_MODEL
+        value: claude-haiku-4-5-20251001
+      - key: CHAT_TURN_LIMIT
+        value: "8"
+      - key: SCORE_RATE_LIMIT
+        value: "20"
+      - key: PORT
+        value: "3001"
+      # Set these in the Render dashboard (never commit real values):
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
