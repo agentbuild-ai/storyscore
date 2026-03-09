@@ -1,0 +1,17 @@
+# Environment variables — never commit
+.env
+
+# Dependencies
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Build output
+client/dist/
+server/dist/
+
+# OS
+.DS_Store
+
+# Private session notes
+notes/

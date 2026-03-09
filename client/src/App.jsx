@@ -1,0 +1,79 @@
+import React, { useState } from 'react';
+import LandingPage from './pages/LandingPage.jsx';
+import ContextPage from './pages/ContextPage.jsx';
+import ChatPage from './pages/ChatPage.jsx';
+import AdminPage from './pages/AdminPage.jsx';
+import PrivacyModal from './components/PrivacyModal.jsx';
+
+const INITIAL_CONTEXT = { q1: '', q2: '', q3: '' };
+
+export default function App() {
+  // Serve admin dashboard at ?admin or /admin without a router library
+  if (window.location.pathname === '/admin' || window.location.search.includes('admin')) {
+    return <AdminPage />;
+  }
+
+  const [step, setStep] = useState('landing');
+  const [scenario, setScenario] = useState(null);
+  const [context, setContext] = useState(INITIAL_CONTEXT);
+
+  function handleScenarioSelect(s) {
+    setScenario(s);
+    setStep('context');
+  }
+
+  function handleContextSubmit(ctx) {
+    setContext(ctx);
+    setStep('chat');
+  }
+
+  function handleRestart() {
+    setScenario(null);
+    setContext(INITIAL_CONTEXT);
+    setStep('landing');
+  }
+
+  // Chat step gets a full-height layout
+  if (step === 'chat') {
+    return (
+      <div style={{
+        height: '100dvh',
+        display: 'flex', flexDirection: 'column',
+        padding: '20px 16px 0',
+        overflow: 'hidden',
+      }}>
+        <div style={{
+          flex: 1, width: '100%', maxWidth: 680,
+          margin: '0 auto',
+          display: 'flex', flexDirection: 'column',
+          overflow: 'hidden',
+        }}>
+          <ChatPage scenario={scenario} context={context} onRestart={handleRestart} />
+        </div>
+      </div>
+    );
+  }
+
+  // Landing page — full width, no max-width constraint
+  if (step === 'landing') {
+    return (
+      <>
+        <PrivacyModal />
+        <LandingPage onSelect={handleScenarioSelect} />
+      </>
+    );
+  }
+
+  // Context wizard step
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-start py-10 px-4">
+      <div className="w-full max-w-2xl">
+        <ContextPage
+          scenario={scenario}
+          onSubmit={handleContextSubmit}
+          onBack={() => setStep('landing')}
+        />
+      </div>
+    </div>
+  );
+}

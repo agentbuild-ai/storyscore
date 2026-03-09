@@ -1,0 +1,25 @@
+{
+  "scenario": "pitching_to_executives",
+  "context": {
+    "q1_audience": "CFO",
+    "q2_ask": "Budget approval for $600K platform migration",
+    "q3_time": "7 minutes"
+  },
+  "text": "We're currently spending $2.1M a year on our legacy data infrastructure — and we have a clear path to cutting that by 40%, saving the company $840K annually, with full payback in under nine months. I'm here to ask for the capital to do it.\n\nRight now, our data platform runs on three separate vendor contracts that don't talk to each other. Every time a business team needs a consolidated report, our engineering team spends 12–15 hours manually reconciling data across systems. That's roughly $380K in engineering time per year spent on work that should be automated. On top of that, we're paying $620K in vendor fees for capabilities we now have in-house.\n\nOver the past quarter, we piloted a replacement on one business unit. We reduced that team's reporting turnaround from three days to four hours and cut their infrastructure cost by 44%. The results held across two quarters of data.\n\nScaling that pilot company-wide requires $600K in migration costs — primarily engineering time and a six-month parallel-run period while we validate the new system against the old. After that, ongoing costs drop to $1.26M annually versus our current $2.1M.\n\nWe're requesting $600K approved by end of Q1 so we can begin migration in Q2 and hit full savings by Q4. At that point, we're looking at $840K in annual savings going forward, with zero net increase in headcount.\n\nI have a detailed cost model and migration timeline if you'd like to go deeper on either. The ask today is approval in principle so we can finalize vendor agreements before the Q1 contract renewal window closes.",
+  "expected_scores": {
+    "impact_first": {
+      "score": 92,
+      "reasoning": "The opening sentence states the current cost ($2.1M annually), the savings potential (40%, $840K), and the payback window (under nine months) before any context or background. A CFO hears the financial stakes within the first two sentences with no effort. The phrase 'I'm here to ask for the capital to do it' immediately frames the purpose, so there is zero delay before the audience knows why this conversation is happening."
+    },
+    "narrative_coherence": {
+      "score": 81,
+      "reasoning": "The arc is clean and traceable: problem stated with dollar cost → root cause explained (three siloed vendor contracts, manual reconciliation) → pilot evidence provided → scale-up plan with costs → specific ask with timeline. Each paragraph earns its position. The transition from 'here is the problem' to 'here is proof it's solvable' in paragraph 3 is the strongest move structurally. The slight weakness is paragraph 4 (migration mechanics), which introduces engineering-level detail — 'parallel-run period' — that slows the momentum just before the close. A one-sentence bridge back to business outcome would tighten it."
+    },
+    "audience_adaptation": {
+      "score": 87,
+      "reasoning": "Language is consistently financial throughout: 'vendor fees,' 'engineering time,' 'infrastructure cost,' 'annual savings,' 'headcount.' The phrase 'automated reconciliation' is the most technical term used, and it is immediately grounded in a business cost ($380K per year). The only mild miscalibration is 'parallel-run period' in paragraph 4 — this is an engineering term that a CFO may not immediately map to a risk mitigation strategy. One word substitution ('overlap period' or 'validation window') would remove it entirely. The closing acknowledgment of a 'detailed cost model' correctly anticipates what a CFO would want next."
+    }
+  },
+  "overall_score": 88,
+  "notes": "This represents a strong executive pitch for a CFO audience seeking budget approval. The quantified opening, clean arc, and financial register are all working together. The primary improvement area is a single paragraph that drifts into implementation language ('parallel-run period') just before the close — a common pattern where the author's engineering instincts briefly override their audience awareness at the moment of highest stakes. The ask is specific: dollar amount, quarter, and downstream milestone. This pitch would earn continued attention from a CFO; the room would not be checking phones."
+}
