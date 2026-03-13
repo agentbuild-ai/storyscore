@@ -15,12 +15,19 @@ const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
   : ['http://localhost:5173', 'http://localhost:3000'];
 
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin && !ALLOWED_ORIGINS.includes(origin)) {
+    return res.status(403).json({ success: false, error: 'Forbidden' });
+  }
+  next();
+});
+
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (curl health checks, server-to-server)
     if (!origin) return callback(null, true);
     if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
-    callback(new Error(`CORS: origin not allowed — ${origin}`));
+    callback(null, false);
   },
 }));
 app.use(express.json());
