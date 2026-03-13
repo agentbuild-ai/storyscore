@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { submitScore, chatWithCoach, submitEmail } from '../utils/api.js';
 import PrivacyBadge from '../components/PrivacyBadge.jsx';
+import { track } from '../utils/analytics.js';
 
 const SCENARIO_LABELS = {
   pitching_to_executives: 'Pitching to Executives',
@@ -155,6 +156,7 @@ function EndSessionPanel({ latestResult, onContinue, onRestart }) {
     try {
       await submitEmail({ session_id: latestResult.session_id, email });
       setStatus('done');
+      track('email_captured', { scenario: latestResult.scenario });
     } catch {
       setStatus('error');
     }
@@ -282,7 +284,7 @@ function EndSessionPanel({ latestResult, onContinue, onRestart }) {
               Continue coaching
             </button>
             <button
-              onClick={onRestart}
+              onClick={() => { track('session_restarted'); onRestart(); }}
               style={{
                 background: 'none', border: 'none',
                 color: 'var(--text-dim)', fontSize: '0.8rem',
@@ -339,6 +341,7 @@ export default function ChatPage({ scenario, context, onRestart }) {
       let newResult = null;
 
       if (wordCount >= MIN_WORDS) {
+        track('score_submitted', { scenario, word_count: wordCount });
         const data = await submitScore({
           scenario,
           context,
@@ -349,14 +352,16 @@ export default function ChatPage({ scenario, context, onRestart }) {
         coachReply = data.coach_reply;
         setLatestResult(data);
 
-        // Push snapshot to score history
-        setScoreHistory(h => [...h, {
+        const snap = {
           impact:  data.pass1.metrics.impact_first.score,
           flow:    data.pass1.metrics.narrative_coherence.score,
           tone:    data.pass1.metrics.audience_adaptation.score,
           overall: data.pass1.overall_score,
-        }]);
+        };
+        setScoreHistory(h => [...h, snap]);
+        track('score_received', { scenario, ...snap });
       } else {
+        track('chat_message_sent', { scenario, word_count: wordCount });
         const data = await chatWithCoach({
           scenario,
           context,

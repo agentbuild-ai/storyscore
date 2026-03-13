@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { track } from './utils/analytics.js';
 import LandingPage from './pages/LandingPage.jsx';
 import ContextPage from './pages/ContextPage.jsx';
 import ChatPage from './pages/ChatPage.jsx';
@@ -18,11 +19,14 @@ export default function App() {
   const [context, setContext] = useState(INITIAL_CONTEXT);
 
   function handleScenarioSelect(s) {
+    track('scenario_selected', { scenario: s });
     setScenario(s);
     setStep('context');
   }
 
   function handleContextSubmit(ctx) {
+    const answered = Object.values(ctx).filter(v => v && v !== 'skipped').length;
+    track('context_submitted', { scenario, questions_answered: answered });
     setContext(ctx);
     setStep('chat');
   }
