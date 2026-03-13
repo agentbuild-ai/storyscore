@@ -416,7 +416,7 @@ export default function ChatPage({ scenario, context, onRestart }) {
           }}>
             StoryScore
           </span>
-          <span style={{
+          <span className="chat-scenario-label" style={{
             background: 'var(--violet-dim)',
             border: '1px solid rgba(177,151,252,0.3)',
             borderRadius: 999, padding: '3px 12px',

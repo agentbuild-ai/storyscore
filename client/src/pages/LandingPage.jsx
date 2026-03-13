@@ -179,6 +179,7 @@ export default function LandingPage({ onSelect }) {
           return (
             <button
               key={card.id}
+              className="scenario-card"
               onClick={() => onSelect(card.id)}
               onMouseEnter={() => setHoveredId(card.id)}
               onMouseLeave={() => setHoveredId(null)}
