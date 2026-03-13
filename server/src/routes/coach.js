@@ -6,6 +6,7 @@ import { buildCoachOnlyMessage } from '../services/scorer.js';
 const router = Router();
 
 const MAX_TURNS = parseInt(process.env.CHAT_TURN_LIMIT || '8');
+const MAX_WORDS = 1000;
 
 const VALID_SCENARIOS = [
   'pitching_to_executives',
@@ -23,6 +24,14 @@ router.post('/', async (req, res) => {
 
     if (!text || typeof text !== 'string' || !text.trim()) {
       return res.status(400).json({ success: false, error: 'text is required.' });
+    }
+
+    const wordCount = text.trim().split(/\s+/).filter(Boolean).length;
+    if (wordCount > MAX_WORDS) {
+      return res.status(400).json({
+        success: false,
+        error: `Message too long. Maximum is ${MAX_WORDS} words.`,
+      });
     }
 
     if (conversation_history.length >= MAX_TURNS) {

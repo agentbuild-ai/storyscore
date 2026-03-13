@@ -7,6 +7,11 @@ import { createSession } from '../services/supabase.js';
 import { ipRateLimit } from '../middleware/rateLimit.js';
 
 const SCORE_RATE_LIMIT = parseInt(process.env.SCORE_RATE_LIMIT || '20');
+const MAX_WORDS = 3000;
+
+function countWords(text) {
+  return text.trim().split(/\s+/).filter(Boolean).length;
+}
 
 const router = Router();
 
@@ -32,6 +37,14 @@ router.post('/', ipRateLimit({ limit: SCORE_RATE_LIMIT }), async (req, res) => {
     }
 
     const cleanText = text.trim();
+    const wordCount = countWords(cleanText);
+
+    if (wordCount > MAX_WORDS) {
+      return res.status(400).json({
+        success: false,
+        error: `Text too long. Maximum is ${MAX_WORDS} words (yours is ${wordCount}).`,
+      });
+    }
 
     // Pass 1 + Pass 2 (sequential — Pass 2 needs Pass 1 output)
     const result = await score({ scenario, context, text: cleanText, conversationHistory: conversation_history });
