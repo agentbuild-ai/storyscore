@@ -2,11 +2,6 @@ import React, { useState } from 'react';
 
 const ACCESS_CODE = import.meta.env.VITE_ACCESS_CODE;
 
-export function isUnlocked() {
-  if (!ACCESS_CODE) return true;
-  return localStorage.getItem('ss_access') === ACCESS_CODE;
-}
-
 export default function GatePage({ onUnlock }) {
   const [input, setInput] = useState('');
   const [error, setError] = useState(false);

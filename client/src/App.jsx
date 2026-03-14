@@ -1,11 +1,17 @@
 import React, { useState } from 'react';
 import { track } from './utils/analytics.js';
-import GatePage, { isUnlocked } from './pages/GatePage.jsx';
+import GatePage from './pages/GatePage.jsx';
 import LandingPage from './pages/LandingPage.jsx';
 import ContextPage from './pages/ContextPage.jsx';
 import ChatPage from './pages/ChatPage.jsx';
 import AdminPage from './pages/AdminPage.jsx';
 import PrivacyModal from './components/PrivacyModal.jsx';
+
+function checkUnlocked() {
+  const code = import.meta.env.VITE_ACCESS_CODE;
+  if (!code) return true;
+  try { return localStorage.getItem('ss_access') === code; } catch { return true; }
+}
 
 const INITIAL_CONTEXT = { q1: '', q2: '', q3: '' };
 
@@ -15,11 +21,7 @@ export default function App() {
     return <AdminPage />;
   }
 
-  if (step === 'gate') {
-    return <GatePage onUnlock={() => setStep('landing')} />;
-  }
-
-  const [step, setStep] = useState(isUnlocked() ? 'landing' : 'gate');
+  const [step, setStep] = useState(checkUnlocked() ? 'landing' : 'gate');
   const [scenario, setScenario] = useState(null);
   const [context, setContext] = useState(INITIAL_CONTEXT);
 
@@ -40,6 +42,10 @@ export default function App() {
     setScenario(null);
     setContext(INITIAL_CONTEXT);
     setStep('landing');
+  }
+
+  if (step === 'gate') {
+    return <GatePage onUnlock={() => setStep('landing')} />;
   }
 
   // Chat step gets a full-height layout
