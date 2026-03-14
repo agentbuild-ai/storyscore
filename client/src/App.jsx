@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { track } from './utils/analytics.js';
+import GatePage, { isUnlocked } from './pages/GatePage.jsx';
 import LandingPage from './pages/LandingPage.jsx';
 import ContextPage from './pages/ContextPage.jsx';
 import ChatPage from './pages/ChatPage.jsx';
@@ -14,7 +15,11 @@ export default function App() {
     return <AdminPage />;
   }
 
-  const [step, setStep] = useState('landing');
+  if (step === 'gate') {
+    return <GatePage onUnlock={() => setStep('landing')} />;
+  }
+
+  const [step, setStep] = useState(isUnlocked() ? 'landing' : 'gate');
   const [scenario, setScenario] = useState(null);
   const [context, setContext] = useState(INITIAL_CONTEXT);
 
