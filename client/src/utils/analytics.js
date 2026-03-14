@@ -7,6 +7,7 @@ export function initAnalytics() {
     api_host: import.meta.env.VITE_POSTHOG_HOST || 'https://us.i.posthog.com',
     capture_pageview: true,
     autocapture: false,
+    disable_session_recording: true,
   });
 }
 
