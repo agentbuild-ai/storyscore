@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { chat } from '../services/ai.js';
 import { loadPrompt } from '../prompts/loader.js';
 import { buildCoachOnlyMessage } from '../services/scorer.js';
+import { createTrace, flush } from '../services/langfuse.js';
 
 const router = Router();
 
@@ -49,6 +50,22 @@ router.post('/', async (req, res) => {
       conversationHistory: conversation_history,
     });
 
+    const trace = createTrace({
+      name: 'coach-chat',
+      metadata: { scenario, word_count: wordCount },
+      tags: [scenario, 'chat-only'],
+    });
+
+    const gen = trace?.generation({
+      name: 'coach-reply',
+      model: process.env.CLAUDE_CHAT_MODEL || 'claude-haiku-4-5-20251001',
+      modelParameters: { temperature: 0.7, maxTokens: 600 },
+      input: [
+        { role: 'system', content: system },
+        { role: 'user', content: userMsg },
+      ],
+    });
+
     const reply = await chat({
       system,
       messages: [{ role: 'user', content: userMsg }],
@@ -57,6 +74,9 @@ router.post('/', async (req, res) => {
       jsonMode: false,
       model: process.env.CLAUDE_CHAT_MODEL || 'claude-haiku-4-5-20251001',
     });
+
+    gen?.end({ output: reply.trim() });
+    flush().catch(() => {});
 
     return res.json({ success: true, data: { coach_reply: reply.trim() } });
   } catch (err) {

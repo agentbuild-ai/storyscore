@@ -5,6 +5,7 @@ import { chat } from '../services/ai.js';
 import { loadPrompt } from '../prompts/loader.js';
 import { createSession } from '../services/supabase.js';
 import { ipRateLimit } from '../middleware/rateLimit.js';
+import { createTrace, flush } from '../services/langfuse.js';
 
 const SCORE_RATE_LIMIT = parseInt(process.env.SCORE_RATE_LIMIT || '20');
 const MAX_WORDS = 3000;
@@ -46,11 +47,19 @@ router.post('/', ipRateLimit({ limit: SCORE_RATE_LIMIT }), async (req, res) => {
       });
     }
 
-    // Pass 1 + Pass 2 (sequential — Pass 2 needs Pass 1 output)
-    const result = await score({ scenario, context, text: cleanText, conversationHistory: conversation_history });
-
-    // Generate session ID now so we can fire-and-forget the DB write
+    // Generate session ID early — used for both Supabase and Langfuse
     const sessionId = randomUUID();
+
+    // Create Langfuse trace for the full scoring session
+    const trace = createTrace({
+      name: 'score-session',
+      sessionId,
+      metadata: { scenario, word_count: wordCount },
+      tags: [scenario],
+    });
+
+    // Pass 1 + Pass 2 (sequential — Pass 2 needs Pass 1 output)
+    const result = await score({ scenario, context, text: cleanText, conversationHistory: conversation_history, trace });
 
     // Fire-and-forget: Supabase write leaves the critical path entirely
     createSession({
@@ -79,6 +88,16 @@ router.post('/', ipRateLimit({ limit: SCORE_RATE_LIMIT }), async (req, res) => {
       conversationHistory: conversation_history,
     });
 
+    const pass3Gen = trace?.generation({
+      name: 'pass3-coach-reply',
+      model: process.env.CLAUDE_CHAT_MODEL || 'claude-haiku-4-5-20251001',
+      modelParameters: { temperature: 0.7, maxTokens: 600 },
+      input: [
+        { role: 'system', content: pass3System },
+        { role: 'user', content: pass3User },
+      ],
+    });
+
     const coachReply = await chat({
       system: pass3System,
       messages: [{ role: 'user', content: pass3User }],
@@ -87,6 +106,9 @@ router.post('/', ipRateLimit({ limit: SCORE_RATE_LIMIT }), async (req, res) => {
       jsonMode: false,
       model: process.env.CLAUDE_CHAT_MODEL || 'claude-haiku-4-5-20251001',
     });
+
+    pass3Gen?.end({ output: coachReply.trim() });
+    flush().catch(() => {});
 
     return res.json({
       success: true,

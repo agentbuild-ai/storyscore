@@ -198,10 +198,22 @@ Generate your coaching reply now.`;
  * @param {Array}  params.conversationHistory - Prior chat exchanges [{role, text}]
  * @returns {Promise<{pass1, pass2, word_count}>}
  */
-export async function score({ scenario, context = {}, text, conversationHistory = [] }) {
+export async function score({ scenario, context = {}, text, conversationHistory = [], trace = null }) {
+  const model = process.env.CLAUDE_MODEL || 'claude-sonnet-4-20250514';
+
   // ── Pass 1: Analytical Scoring ────────────────────────────────────────────
   const pass1System = buildPass1System(scenario);
   const pass1User = buildPass1UserMessage(scenario, context, text);
+
+  const pass1Gen = trace?.generation({
+    name: 'pass1-analytical-scoring',
+    model,
+    modelParameters: { temperature: 0, maxTokens: 2048 },
+    input: [
+      { role: 'system', content: pass1System },
+      { role: 'user', content: pass1User },
+    ],
+  });
 
   const pass1Raw = await chat({
     system: pass1System,
@@ -209,6 +221,8 @@ export async function score({ scenario, context = {}, text, conversationHistory 
     temperature: 0,
     maxTokens: 2048,
   });
+
+  pass1Gen?.end({ output: pass1Raw });
 
   let pass1Result;
   try {
@@ -223,12 +237,24 @@ export async function score({ scenario, context = {}, text, conversationHistory 
   const pass2System = loadPrompt('pass2-coaching');
   const pass2User = buildPass2UserMessage(pass1Result, scenario, context, text);
 
+  const pass2Gen = trace?.generation({
+    name: 'pass2-coaching-generation',
+    model,
+    modelParameters: { temperature: 0.3, maxTokens: 2048 },
+    input: [
+      { role: 'system', content: pass2System },
+      { role: 'user', content: pass2User },
+    ],
+  });
+
   const pass2Raw = await chat({
     system: pass2System,
     messages: [{ role: 'user', content: pass2User }],
     temperature: 0.3,
     maxTokens: 2048,
   });
+
+  pass2Gen?.end({ output: pass2Raw });
 
   let pass2Result;
   try {
