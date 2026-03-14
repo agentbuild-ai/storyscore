@@ -40,7 +40,11 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/delete-my-data', deleteMyDataRoutes);
 
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', ai_provider: getProvider() });
+  res.json({
+    status: 'ok',
+    ai_provider: getProvider(),
+    langfuse: !!process.env.LANGFUSE_SECRET_KEY,
+  });
 });
 
 app.listen(PORT, () => {
